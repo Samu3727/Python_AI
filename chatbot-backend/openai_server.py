@@ -19,10 +19,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configuración del OpenAI
+# Configuración del OpenAI (usando OpenRouter)
 try:
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    print("Cliente OpenAI inicializado correctamente")
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        base_url="https://openrouter.ai/api/v1"
+    )
+    print("Cliente OpenAI inicializado correctamente (usando OpenRouter)")
 except Exception as e:
     print(f"Error al inicializar OpenAI: {e}")
     client = None
