@@ -19,7 +19,7 @@ app.add_middleware(
 
 #Configuración del OpenAI
 
-# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class Message(BaseModel):
     message: str
@@ -28,24 +28,15 @@ class Message(BaseModel):
 @app.post("/chat")
 async def chat(msg: Message):
     try:
-        # Respuesta simple sin OpenAI para pruebas
-        # Descomenta el código de abajo cuando tengas la API key configurada
-        
-        # response = client.chat.completions.create(
-        #     model = "gpt-3.5-turbo",
-        #     messages = [
-        #         {"role": "system", "content": "Eres un compañero muy util jajajajajaja."},
-        #         {"role": "user", "content": msg.message}
-        #     ]
-        # )
-        # return {
-        #     "response": response.choices[0].message.content,
-        #     "success": True
-        # }
-        
-        # Respuesta de prueba
+        response = client.chat.completions.create(
+            model = "gpt-3.5-turbo",
+            messages = [
+                {"role": "system", "content": "Eres un asistente útil y amigable."},
+                {"role": "user", "content": msg.message}
+            ]
+        )
         return {
-            "response": f"¡Hola! Recibí tu mensaje: '{msg.message}'. (Modo de prueba - configura OPENAI_API_KEY para usar IA)",
+            "response": response.choices[0].message.content,
             "success": True
         }
         
