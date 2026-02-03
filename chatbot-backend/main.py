@@ -1,53 +1,54 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from openai import OpenAI
-import os
+from routes import chat_router, health_router
+from config import settings
+import logging
+import sys
 
-app = FastAPI()
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-#Configuarción del CORS.
+# Información de inicio
+logger.info("=== Iniciando servidor ===")
+logger.info(f"Python version: {sys.version}")
+logger.info(f"OPENAI_API_KEY configurada: {settings.is_openai_configured()}")
 
-app.add_middleware(
-    
-    CORSMiddleware, 
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Crear aplicación FastAPI
+app = FastAPI(
+    title="Chatbot API",
+    description="API REST para chatbot con soporte múltiple de proveedores IA",
+    version="2.0.0"
 )
 
-#Configuración del OpenAI
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=settings.CORS_CREDENTIALS,
+    allow_methods=settings.CORS_METHODS,
+    allow_headers=settings.CORS_HEADERS,
+)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Registrar routers
+app.include_router(chat_router)
+app.include_router(health_router)
 
-class Message(BaseModel):
-    message: str
-    user_id: str = "default"
-    
-@app.post("/chat")
-async def chat(msg: Message):
-    try:
-        print(f"Recibido: {msg.message}")
-        response = client.chat.completions.create(
-            model = "gpt-3.5-turbo",
-            messages = [
-                {"role": "system", "content": "Eres un asistente útil y amigable."},
-                {"role": "user", "content": msg.message}
-            ]
-        )
-        bot_response = response.choices[0].message.content
-        print(f"Respuesta: {bot_response}")
-        return {
-            "response": bot_response,
-            "success": True
-        }
-        
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return {"error": str(e), "success": False}
-    
+
 @app.get("/")
 async def root():
-    
-    return {"message": "API del chatboy funcionando correctamente."}
+    """Endpoint raíz con información básica del servidor"""
+    return {
+        "message": "Chatbot API v2.0 - Refactorizado con principios SOLID",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    logger.info(f"Iniciando uvicorn en {settings.HOST}:{settings.PORT}")
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)
