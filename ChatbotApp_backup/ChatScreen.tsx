@@ -11,7 +11,9 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.5:8000';
+// For Android Emulator, use localhost with adb reverse
+// Run: adb reverse tcp:8000 tcp:8000
+const API_URL = 'http://localhost:8000';
 
 interface Message {
   id: string;
@@ -28,9 +30,10 @@ export default function ChatScreen() {
   const sendMessage = async () => {
     if (!inputText.trim()) return;
 
+    const messageToSend = inputText;
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputText,
+      text: messageToSend,
       isUser: true,
       timestamp: new Date(),
     };
@@ -40,10 +43,24 @@ export default function ChatScreen() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/chat`, {
-        message: inputText,
-        user_id: 'user123',
-      });
+      console.log('Sending to:', `${API_URL}/chat`);
+      console.log('Message:', messageToSend);
+      
+      const response = await axios.post(
+        `${API_URL}/chat`,
+        {
+          message: messageToSend,
+          user_id: 'user123',
+        },
+        {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('Response:', response.data);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -53,11 +70,14 @@ export default function ChatScreen() {
       };
 
       setMessages(prev => [botMessage, ...prev]);
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (error: any) {
+      console.error('Error completo:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error message:', error.message);
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Error al conectar con el servidor',
+        text: `Error: ${error.message || 'No se pudo conectar al servidor'}`,
         isUser: false,
         timestamp: new Date(),
       };

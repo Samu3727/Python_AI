@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import openai
+from openai import OpenAI
 import os
 
 app = FastAPI()
@@ -19,7 +19,7 @@ app.add_middleware(
 
 #Configuración del OpenAI
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class Message(BaseModel):
     message: str
@@ -28,19 +28,24 @@ class Message(BaseModel):
 @app.post("/chat")
 async def chat(msg: Message):
     try:
-        response = openai.ChatCompletion.create(
-            
-            model = "gpt-3.5-turbo",
-            messages = [
-                
-                {"role": "system", "content": "Eres un compañero muy util jajajajajaja."},
-                {"role": "user", "content": msg.message}
-            ]
-        )
+        # Respuesta simple sin OpenAI para pruebas
+        # Descomenta el código de abajo cuando tengas la API key configurada
         
+        # response = client.chat.completions.create(
+        #     model = "gpt-3.5-turbo",
+        #     messages = [
+        #         {"role": "system", "content": "Eres un compañero muy util jajajajajaja."},
+        #         {"role": "user", "content": msg.message}
+        #     ]
+        # )
+        # return {
+        #     "response": response.choices[0].message.content,
+        #     "success": True
+        # }
+        
+        # Respuesta de prueba
         return {
-            
-            "response": response.choices[0].message.content,
+            "response": f"¡Hola! Recibí tu mensaje: '{msg.message}'. (Modo de prueba - configura OPENAI_API_KEY para usar IA)",
             "success": True
         }
         
