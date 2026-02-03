@@ -28,6 +28,7 @@ class Message(BaseModel):
 @app.post("/chat")
 async def chat(msg: Message):
     try:
+        print(f"Recibido: {msg.message}")
         response = client.chat.completions.create(
             model = "gpt-3.5-turbo",
             messages = [
@@ -35,13 +36,15 @@ async def chat(msg: Message):
                 {"role": "user", "content": msg.message}
             ]
         )
+        bot_response = response.choices[0].message.content
+        print(f"Respuesta: {bot_response}")
         return {
-            "response": response.choices[0].message.content,
+            "response": bot_response,
             "success": True
         }
         
     except Exception as e:
-        
+        print(f"Error: {str(e)}")
         return {"error": str(e), "success": False}
     
 @app.get("/")

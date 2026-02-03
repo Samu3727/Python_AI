@@ -11,9 +11,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
-// For Android Emulator, use localhost with adb reverse
-// Run: adb reverse tcp:8000 tcp:8000
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://10.230.104.192:8000';
 
 interface Message {
   id: string;
@@ -51,7 +49,7 @@ export default function ChatScreen() {
         {
           message: messageToSend,
           user_id: 'user123',
-        },
+        },  
         {
           timeout: 10000,
           headers: {
